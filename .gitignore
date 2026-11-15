@@ -1,0 +1,17 @@
+node_modules/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local environment files; examples are safe to commit.
+.env
+.env.*
+!.env.example
+
+# Local runtime/tool downloads and logs.
+.tools/
+*.log
+.DS_Store
+Thumbs.db

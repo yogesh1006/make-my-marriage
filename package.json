@@ -1,0 +1,40 @@
+{
+  "name": "make-my-marriage",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "packages/contracts"
+  ],
+  "engines": {
+    "node": "\u003e=24 \u003c25",
+    "npm": "\u003e=11 \u003c12"
+  },
+  "packageManager": "npm@11.19.1",
+  "scripts": {
+    "dev": "concurrently --kill-others --names web,api \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm run dev --workspace=@mmm/web",
+    "dev:api": "npm run dev --workspace=@mmm/api",
+    "build": "npm run build:contracts \u0026\u0026 npm run build:api \u0026\u0026 npm run build:web",
+    "build:web": "npm run build --workspace=@mmm/web",
+    "build:api": "npm run build --workspace=@mmm/api",
+    "build:contracts": "npm run build --workspace=@mmm/contracts",
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix --max-warnings=0",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "check": "npm run format:check \u0026\u0026 npm run lint \u0026\u0026 npm run typecheck \u0026\u0026 npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "concurrently": "10.0.7",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.14.0",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.2"
+  }
+}
