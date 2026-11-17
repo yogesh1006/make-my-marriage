@@ -1,92 +1,127 @@
 # Make My Marriage
 
-A collaborative wedding-management application for couples and their wedding managers, with account-free guest experiences. This repository currently contains the **Phase 0 scaffold only**.
+A collaborative Indian wedding management application. This repository contains a
+fresh, minimal Next.js App Router foundation with TypeScript and source in `src/`.
+
+## Setup
+
+Use Node.js 24 LTS (recommended) and npm. The lint toolchain supports Node.js
+20.19+, 22.13+, and 24+. Node.js 23 is outside its supported engine ranges.
+
+```sh
+npm ci
+npm run dev
+```
+
+Open http://localhost:3000. No database, cloud account, or environment variables
+are required for the scaffold. Copy `.env.example` to `.env.local` when a feature
+needs configuration. Never commit real credentials or expose secrets through
+`NEXT_PUBLIC_` variables.
 
 ## Structure
 
 ```text
-apps/web            Next.js + TypeScript + App Router
-apps/api            Express + TypeScript modular monolith
-packages/contracts  Browser-safe shared API contracts; intentionally empty API surface
-docs                Approved product, architecture, database, and API documents
-.github/workflows   Validation workflow; no deployment
+make-my-marriage/
+  docs/                          Four approved design documents, unchanged
+  public/
+    favicon.svg                  Static application icon
+  src/
+    app/
+      api/v1/health/route.ts     Thin HTTP liveness handler
+      globals.css                Tailwind CSS import and global styles
+      layout.tsx                 Root layout and application metadata
+      page.tsx                   Welcome page
+    server/
+      health.ts                  Server-only liveness implementation
+      README.md                  Backend boundaries and future feature map
+  .env.example                   Configuration guidance without secrets
+  .gitignore                     Generated files and secrets excluded
+  AGENTS.md                      Project and installed Next.js instructions
+  eslint.config.mjs              Next.js Core Web Vitals and TypeScript rules
+  next.config.ts                 Next.js configuration
+  postcss.config.mjs             Tailwind CSS PostCSS plugin
+  package.json                   One application and one set of npm scripts
+  package-lock.json              Reproducible npm dependency resolution
+  tsconfig.json                  Strict TypeScript and @/* source alias
 ```
 
-Future feature directories are created only when needed. The contracts package has no domain schemas or runtime dependencies yet; neither app imports it yet.
+Next.js generates `next-env.d.ts` and `.next/`; TypeScript generates its build
+cache. These files and `node_modules/` are ignored by Git.
 
-## Approved architecture
+## Commands
 
-One Git repository, REST APIs, a modular-monolith backend, and separate frontend/backend deployments. The planned stack includes MongoDB Atlas/Mongoose, custom JWT authentication, AWS SES/SQS, and private S3/CloudFront media. The frontend will deploy to Vercel and the backend to AWS. Database, authentication, integrations, and deployment are outside this scaffold.
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start development with the default Turbopack bundler |
+| `npm run build` | Build for production |
+| `npm start` | Serve the production build |
+| `npm run lint` | Run ESLint with zero warnings allowed |
+| `npm run lint:fix` | Apply automatic ESLint fixes |
+| `npm run typecheck` | Generate route types and run TypeScript |
+| `npm run check` | Run lint, type checking, and a production build |
 
-Source of truth:
+Run `npm run check` after implementation changes. If Turbopack has problems in a
+local environment, Next.js supports `npm run dev -- --webpack` and
+`npm run build -- --webpack`.
+
+## Architecture and scope
+
+There is one root Next.js application and one application server. Pages and
+Route Handlers live in `src/app`; backend implementation lives in `src/server`.
+The same-origin API needs no separate Express application or API proxy.
+Executable backend modules import `server-only`.
+
+Implemented: a welcome page, root layout, static icon, and
+`GET /api/v1/health`, returning `{ "data": { "status": "ok" } }` with an
+`X-Request-Id` header. The health route checks application liveness only.
+
+Add collection-backed feature modules under `src/server/modules/<feature>` as
+features are built. See [backend organization](src/server/README.md) for the
+planned domain map and implementation rules. Authentication, database models,
+wedding features, cloud integrations, and deployment are not implemented yet.
+
+## Design documents
 
 - [Product requirements](docs/PRD.md)
 - [System architecture](docs/SYSTEM_ARCHITECTURE.md)
 - [Database design](docs/DATABASE_DESIGN.md)
 - [API design](docs/API_DESIGN.md)
 
-These documents must not be reformatted by tooling. The requested Phase 0 health route is `/api/v1/health`; the documents' operational `/health` and `/ready` routes remain a later deployment concern.
+These four approved files are preserved unchanged. Their separate Express backend,
+Vercel/AWS split, and cross-origin configuration describe the historical design.
+The current single-application direction takes precedence: implement the domain,
+security, API, and database contracts within Next.js Route Handlers and server-only
+modules as each feature is requested.
 
-## Prerequisites
+## Next.js references
 
-- Node.js **24.22.3 LTS**, pinned in `.nvmrc`.
-- npm **11.19.1**, pinned in the root `packageManager`.
-- Git.
+This foundation follows the official [manual installation](https://nextjs.org/docs/app/getting-started/installation#manual-installation),
+[project structure](https://nextjs.org/docs/app/getting-started/project-structure),
+and [Route Handler](https://nextjs.org/docs/app/getting-started/route-handlers)
+guides. It uses Tailwind CSS and the `@/*` source alias. Installed-version guides are
+available in `node_modules/next/dist/docs/`.
 
-Use your Node version manager to select the pinned version. Dependencies are installed from the repository root and recorded in one lockfile. TypeScript 5.9 is selected to remain within the ESLint TypeScript parser's supported range.
+## Dependency notes
 
-## Install and run
+The documented Next.js ESLint configuration currently depends on ESLint 9 through
+its React plugin peer dependencies. npm reports that ESLint 9 is out of support.
+The installed lint dependency chain also has 14 high audit findings stemming from
+the unpatched [picomatch advisory GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf).
+These findings are in development dependencies; the runtime-only installation
+reported no vulnerabilities. No forced downgrade or incompatible override has been
+applied. Use `npm audit` to inspect the current dependency report.
+
+## Styling
+
+Tailwind CSS is installed using the official
+[Next.js integration](https://tailwindcss.com/docs/installation/framework-guides/nextjs):
 
 ```sh
-npm install
-npm run dev
+npm install --save-dev --save-exact tailwindcss@latest @tailwindcss/postcss@latest postcss@latest
 ```
 
-Local defaults allow both apps to start without creating environment files. Local development uses the supported Next.js Webpack mode after Turbopack development compilation timed out on this Windows workspace. Production builds retain the default Next.js bundler.
-
-| Service                         | URL                                 |
-| ------------------------------- | ----------------------------------- |
-| Frontend                        | http://localhost:3000               |
-| Backend health                  | http://localhost:5000/api/v1/health |
-| Health through frontend rewrite | http://localhost:3000/api/v1/health |
-
-The backend root has no product route and returns a JSON 404. Press Ctrl+C to stop development processes.
-
-## Local environment
-
-To override defaults, copy:
-
-- `apps/web/.env.example` to `apps/web/.env.local`.
-- `apps/api/.env.example` to `apps/api/.env`.
-
-Do not commit real environment files. No MongoDB, JWT, AWS, or Google configuration is needed.
-
-The frontend's `API_UPSTREAM_URL` is server-only and defaults to `http://localhost:5000`. Its rewrite preserves `/api/v1/*`. Restart Next.js after changing the upstream.
-
-The API validates configuration with Zod. `FRONTEND_ORIGINS` is a comma-separated exact-origin allow-list. `APP_ENV` is local/staging/production; `NODE_ENV` keeps standard Node values. Staging and production will receive isolated configuration through their hosting environments.
-
-## Commands
-
-| Command                                   | Purpose                                               |
-| ----------------------------------------- | ----------------------------------------------------- |
-| `npm run dev`                             | Run web and API together                              |
-| `npm run dev:web`                         | Run only Next.js                                      |
-| `npm run dev:api`                         | Run only the API with restart-on-change               |
-| `npm run build`                           | Build contracts, API, then web                        |
-| `npm run build:contracts`                 | Emit browser-safe ESM and declarations                |
-| `npm run build:api`                       | Compile API into `apps/api/dist`                      |
-| `npm run build:web`                       | Build Next.js                                         |
-| `npm run typecheck`                       | Generate Next.js route types and check all workspaces |
-| `npm run lint` / `npm run lint:fix`       | Check / fix lint issues                               |
-| `npm run format` / `npm run format:check` | Format / check formatting, excluding approved docs    |
-| `npm run check`                           | Format check, lint, typecheck, and build              |
-
-After building, start the API with `npm run start --workspace=@mmm/api` and web with `npm run start --workspace=@mmm/web`. Production API execution uses compiled JavaScript.
-
-## Validation and next phases
-
-CI runs `npm ci`, formatting, linting, type checking, and builds. There are no placeholder test scripts or deployment jobs.
-
-The API includes only environment configuration, structured logs, generated request IDs, error envelopes, security headers, exact-origin CORS, JSON parsing, and health. Raw URLs, headers, and bodies are omitted from HTTP logs.
-
-Next work requires explicit approval: database connection, authentication/session security, and then wedding membership and application modules. No database schemas, authentication, cloud integration, or product features are implemented.
+`postcss.config.mjs` enables `@tailwindcss/postcss`, and `src/app/globals.css`
+imports Tailwind. Use utility classes in components; the welcome page uses the
+`flex` utility. Existing global styles provide the application's initial look.
+Tailwind scans source files automatically, so no JavaScript Tailwind configuration
+or manual content globs are needed for this setup.

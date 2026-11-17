@@ -1,17 +1,20 @@
+# Dependencies and generated output
 node_modules/
 .next/
-dist/
+out/
+build/
 coverage/
 *.tsbuildinfo
 next-env.d.ts
 
-# Local environment files; examples are safe to commit.
-.env
-.env.*
+# Local configuration; commit examples only
+.env*
 !.env.example
+.vercel/
 
-# Local runtime/tool downloads and logs.
-.tools/
+# Credentials, logs, and operating-system files
+*.pem
+*.key
 *.log
 .DS_Store
 Thumbs.db

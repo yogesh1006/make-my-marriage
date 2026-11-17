@@ -1,3 +1,0 @@
-* text=auto eol=lf
-# Preserve the approved documents byte-for-byte, including on Windows checkout.
-docs/** -text
